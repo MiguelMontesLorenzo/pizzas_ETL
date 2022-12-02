@@ -50,16 +50,17 @@ pizza_type_price_quantity = pizza_type_price.merge(df_temp, on='pizza_id', how =
 pizza_type_price_quantity['ponderated_quantities'] = pizza_type_price_quantity.apply(ponderate_quatity_by_size, axis = 1)
 
 #Obtain ponderated quantities of each pizza_type_id  (According to the sizes 'S':0.75, 'M':1, 'L':1.25, 'XL':1.5, 'XXL':1.75   of pizza_id)
-df_temp = pizza_type_price_quantity.groupby('pizza_type_id').sum()['ponderated_quantities'].to_frame()
+df_temp = pizza_type_price_quantity.groupby('pizza_type_id').sum(numeric_only = False)['ponderated_quantities'].to_frame()
 pizzas_ingredients = pizzas_ingredients.merge(df_temp, on='pizza_type_id', how = 'inner')
 
 #Obtain ponderated quantities of each ingredient
 all_ingredients = dict()
 for index, row in pizzas_ingredients.iterrows():
     
-    row_ingredients = row['ingredients'].split()
+    row_ingredients = row['ingredients'].split(',')
     
     for i in row_ingredients:
+        i = i.strip()
         if (i in all_ingredients.keys()):
             all_ingredients[i] += row['ponderated_quantities']
         else:
@@ -89,4 +90,4 @@ hole_period = 365  #days
 #we obtain igredient usage per week
 ingredients_ponderated_quantities_criteria1['per_week'] = (ingredients_ponderated_quantities_criteria1['quantity']*(adq_period/hole_period)).round(2)
 print('CRITERIA: Weekly adquirements')
-display(ingredients_ponderated_quantities_criteria1)
+print(ingredients_ponderated_quantities_criteria1)
